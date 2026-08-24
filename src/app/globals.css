@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+/*
+ * Tonight is a night-first product — always dark, not theme-adaptive.
+ * Deep navy/charcoal base, soft moonlight-yellow / warm-orange accents.
+ * Kept intentionally low-saturation: this should never read as a dating app.
+ */
+:root {
+  --color-night: #12141f;
+  --color-night-deep: #0b0c14;
+  --color-card: #1c2032;
+  --color-card-hover: #262b42;
+  --color-moon: #f3f1ea;
+  --color-accent: #f5c869;
+  --color-accent-soft: #f5c86933;
+  --color-ember: #f0955c;
+}
+
+@theme inline {
+  --color-night: var(--color-night);
+  --color-night-deep: var(--color-night-deep);
+  --color-card: var(--color-card);
+  --color-card-hover: var(--color-card-hover);
+  --color-moon: var(--color-moon);
+  --color-accent: var(--color-accent);
+  --color-accent-soft: var(--color-accent-soft);
+  --color-ember: var(--color-ember);
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  background: radial-gradient(circle at 50% -10%, #1b2036 0%, var(--color-night-deep) 60%);
+  background-attachment: fixed;
+  color: var(--color-moon);
+  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
+    "Yu Gothic", "Noto Sans JP", "Segoe UI", Roboto, sans-serif;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* selection handle for the availability picker should never trigger native
+ * text selection while dragging on mobile */
+.no-select {
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+}

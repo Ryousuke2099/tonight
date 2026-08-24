@@ -9,7 +9,7 @@ import FriendSelector, { type FriendOption } from "@/components/FriendSelector";
 import AddFriendForm from "@/components/AddFriendForm";
 import MatchCard from "@/components/MatchCard";
 import Avatar from "@/components/Avatar";
-import { tonightDateJST, formatDateJa } from "@/lib/date";
+import { tonightDateJST, formatDateJa, formatDateShortJa, nextNDatesJST } from "@/lib/date";
 import { summarizeSlots } from "@/lib/slots";
 import type { IntentMode, MatchWithFriend, SlotIndex } from "@/types/db";
 
@@ -22,7 +22,8 @@ export default function HomeClient({
 }) {
   const router = useRouter();
   const supabase = useMemo(() => createClient(), []);
-  const date = useMemo(() => tonightDateJST(), []);
+  const dateOptions = useMemo(() => nextNDatesJST(7), []);
+  const [date, setDate] = useState(() => tonightDateJST());
 
   const [loading, setLoading] = useState(true);
   const [step, setStep] = useState<Step>("mode");
@@ -102,11 +103,27 @@ export default function HomeClient({
     }
   }
 
+  function changeDate(d: string) {
+    if (d === date) return;
+    // Reset the wizard to defaults before switching — each date has its
+    // own, independent intent/availability, so we shouldn't carry over
+    // what was picked for a different day.
+    setLoading(true);
+    setStep("mode");
+    setMode("selected");
+    setSlots([]);
+    setTargetIds([]);
+    setSubmitted(false);
+    setDate(d);
+  }
+
   async function logout() {
     await supabase.auth.signOut();
     router.push("/");
     router.refresh();
   }
+
+  const dateLabel = formatDateJa(date);
 
   if (loading) {
     return (
@@ -118,16 +135,33 @@ export default function HomeClient({
 
   return (
     <main className="min-h-dvh flex flex-col">
-      <header className="flex items-center justify-between px-5 pt-6 pb-4">
-        <div>
-          <p className="text-xs text-moon/40">{formatDateJa(date)}</p>
+      <header className="px-5 pt-6 pb-3 space-y-3">
+        <div className="flex items-center justify-between">
           <h1 className="text-lg font-medium text-moon">Tonight</h1>
+          <div className="flex items-center gap-2">
+            <Avatar src={me.avatar_url} name={me.name} size={32} />
+            <button onClick={logout} className="text-xs text-moon/40 hover:text-moon/70">
+              ログアウト
+            </button>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Avatar src={me.avatar_url} name={me.name} size={32} />
-          <button onClick={logout} className="text-xs text-moon/40 hover:text-moon/70">
-            ログアウト
-          </button>
+
+        <div>
+          <div className="flex gap-1.5 overflow-x-auto">
+            {dateOptions.map((d) => (
+              <button
+                key={d}
+                onClick={() => changeDate(d)}
+                className={[
+                  "shrink-0 rounded-full px-3 py-1.5 text-xs transition-colors",
+                  d === date ? "bg-accent text-night font-medium" : "bg-white/5 text-moon/60 hover:bg-white/10",
+                ].join(" ")}
+              >
+                {formatDateShortJa(d)}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs text-moon/40 mt-1.5">{formatDateJa(date)}の予定</p>
         </div>
       </header>
 
@@ -135,6 +169,7 @@ export default function HomeClient({
         {step === "mode" && (
           <ModeStep
             mode={mode}
+            dateLabel={dateLabel}
             onSelect={(m) => {
               setMode(m);
               setStep("availability");
@@ -145,7 +180,7 @@ export default function HomeClient({
         {step === "availability" && (
           <div className="space-y-6">
             <StepHeader
-              title="今夜、話せる時間は？"
+              title={`${dateLabel}、話せる時間は？`}
               subtitle="20:00〜翌2:00の間で、話せそうな時間を選んでください"
             />
             <AvailabilityPicker value={slots} onChange={setSlots} />
@@ -169,7 +204,7 @@ export default function HomeClient({
 
         {step === "friends" && (
           <div className="space-y-6">
-            <StepHeader title="今夜、誰と話したい？" subtitle="複数選べます" />
+            <StepHeader title={`${dateLabel}、誰と話したい？`} subtitle="複数選べます" />
             <p className="text-xs text-moon/40 bg-white/[0.03] rounded-xl px-4 py-3">
               🔒 あなたが選んだことは、マッチするまで相手にはわかりません
             </p>
@@ -213,6 +248,7 @@ export default function HomeClient({
             targetCount={targetIds.length}
             matches={matches}
             submitted={submitted}
+            dateLabel={dateLabel}
             onEdit={() => setStep("mode")}
           />
         )}
@@ -230,12 +266,20 @@ function StepHeader({ title, subtitle }: { title: string; subtitle?: string }) {
   );
 }
 
-function ModeStep({ mode, onSelect }: { mode: IntentMode; onSelect: (m: IntentMode) => void }) {
+function ModeStep({
+  mode,
+  dateLabel,
+  onSelect,
+}: {
+  mode: IntentMode;
+  dateLabel: string;
+  onSelect: (m: IntentMode) => void;
+}) {
   return (
     <div className="space-y-6 pt-4">
       <div className="space-y-1">
         <p className="text-3xl">🌙</p>
-        <h2 className="text-xl font-medium text-moon">今夜、誰かと話したい？</h2>
+        <h2 className="text-xl font-medium text-moon">{dateLabel}、誰かと話したい？</h2>
         <p className="text-sm text-moon/50">
           相手も話したい時だけ、つながります。あなたの気持ちが一方的に伝わることはありません。
         </p>
@@ -297,6 +341,7 @@ function StatusStep({
   targetCount,
   matches,
   submitted,
+  dateLabel,
   onEdit,
 }: {
   mode: IntentMode;
@@ -304,6 +349,7 @@ function StatusStep({
   targetCount: number;
   matches: MatchWithFriend[];
   submitted: boolean;
+  dateLabel: string;
   onEdit: () => void;
 }) {
   const summary = summarizeSlots(slots);
@@ -313,7 +359,7 @@ function StatusStep({
       {matches.length > 0 ? (
         <div className="space-y-1">
           <h2 className="text-xl font-medium text-moon">マッチしました</h2>
-          <p className="text-sm text-moon/50">今夜、話せそうな友達がいます</p>
+          <p className="text-sm text-moon/50">{dateLabel}、話せそうな友達がいます</p>
         </div>
       ) : (
         <div className="space-y-1 text-center pt-6">
@@ -333,7 +379,7 @@ function StatusStep({
 
       {submitted && (
         <div className="rounded-2xl bg-card p-4 space-y-2">
-          <p className="text-xs text-moon/40 uppercase tracking-wide">今日の設定</p>
+          <p className="text-xs text-moon/40 uppercase tracking-wide">{dateLabel}の設定</p>
           <p className="text-moon text-sm">{summary || "時間未設定"}</p>
           <p className="text-moon/60 text-sm">
             {mode === "anyone" ? "友達なら誰とでも話したい" : `${targetCount}人となら話したい`}

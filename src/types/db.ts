@@ -60,7 +60,7 @@ export interface Match {
 }
 
 export interface MatchWithFriend extends Match {
-  friend: Pick<Profile, "id" | "name" | "avatar_url">;
+  friend: Pick<Profile, "id" | "name" | "avatar_url" | "is_demo">;
 }
 
 export interface InviteLink {

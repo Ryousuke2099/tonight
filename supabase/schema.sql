@@ -13,17 +13,41 @@ create table if not exists public.profiles (
   created_at timestamptz not null default now()
 );
 
--- auto-create a profile row whenever a new auth user is created
+-- auto-create a profile row whenever a new auth user is created. Also:
+-- flags @tonight.demo accounts as is_demo, and auto-friends every *real*
+-- (non-demo) signup with the four "always active" demo companions (Haru/
+-- Yuki/Mei/Ren) so a brand-new user can see a real match immediately after
+-- registering only their own info — no need to also control a second
+-- account. See ensureDemoCompanionsActiveFor() in src/lib/demo-companions.ts
+-- for the other half (keeping those companions' daily intent fresh).
 create or replace function public.handle_new_user()
 returns trigger as $$
+declare
+  companion_email text;
 begin
-  insert into public.profiles (id, name, avatar_url)
+  insert into public.profiles (id, name, avatar_url, is_demo)
   values (
     new.id,
     coalesce(new.raw_user_meta_data->>'name', split_part(new.email, '@', 1)),
-    new.raw_user_meta_data->>'avatar_url'
+    new.raw_user_meta_data->>'avatar_url',
+    new.email like '%@tonight.demo'
   )
   on conflict (id) do nothing;
+
+  if new.email not like '%@tonight.demo' then
+    for companion_email in
+      select unnest(array['haru@tonight.demo', 'yuki@tonight.demo', 'mei@tonight.demo', 'ren@tonight.demo'])
+    loop
+      insert into public.friendships (user_id, friend_id)
+      select new.id, u.id from auth.users u where u.email = companion_email
+      on conflict (user_id, friend_id) do nothing;
+
+      insert into public.friendships (user_id, friend_id)
+      select u.id, new.id from auth.users u where u.email = companion_email
+      on conflict (user_id, friend_id) do nothing;
+    end loop;
+  end if;
+
   return new;
 end;
 $$ language plpgsql security definer set search_path = public;
@@ -119,6 +143,21 @@ create table if not exists public.guest_responses (
   overlap_end int,
   created_at timestamptz not null default now()
 );
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- sent_reminders: idempotency guard for the daily day-of reminder email
+-- (see /api/cron/reminders). One row per (user, date) that's already been
+-- emailed, so a retried or duplicate cron run never double-sends. Written
+-- only by the service-role cron route — no client-facing policies.
+-- ─────────────────────────────────────────────────────────────────────────
+create table if not exists public.sent_reminders (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  date date not null,
+  sent_at timestamptz not null default now(),
+  unique (user_id, date)
+);
+alter table public.sent_reminders enable row level security;
 
 -- ─────────────────────────────────────────────────────────────────────────
 -- Row Level Security
@@ -222,3 +261,35 @@ create policy "read responses to own invites"
 -- ─────────────────────────────────────────────────────────────────────────
 alter publication supabase_realtime add table public.matches;
 alter publication supabase_realtime add table public.guest_responses;
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- One-time backfill for the demo-companion changes above, so re-running
+-- this file against a project that already has users retroactively (a)
+-- flags existing @tonight.demo profiles as is_demo, and (b) auto-friends
+-- existing real users with the demo companions too — not just future
+-- signups going through the trigger. Both are idempotent (safe to re-run).
+-- ─────────────────────────────────────────────────────────────────────────
+update public.profiles p
+set is_demo = true
+from auth.users u
+where u.id = p.id and u.email like '%@tonight.demo' and p.is_demo = false;
+
+do $$
+declare
+  companion_email text;
+  real_user record;
+begin
+  for real_user in select id, email from auth.users where email not like '%@tonight.demo' loop
+    for companion_email in
+      select unnest(array['haru@tonight.demo', 'yuki@tonight.demo', 'mei@tonight.demo', 'ren@tonight.demo'])
+    loop
+      insert into public.friendships (user_id, friend_id)
+      select real_user.id, u.id from auth.users u where u.email = companion_email
+      on conflict (user_id, friend_id) do nothing;
+
+      insert into public.friendships (user_id, friend_id)
+      select u.id, real_user.id from auth.users u where u.email = companion_email
+      on conflict (user_id, friend_id) do nothing;
+    end loop;
+  end loop;
+end $$;

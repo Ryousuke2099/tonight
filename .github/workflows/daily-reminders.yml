@@ -1,0 +1,18 @@
+name: Daily reminder emails
+
+on:
+  schedule:
+    # 00:00 UTC = 09:00 JST. GitHub may delay scheduled runs by a few
+    # minutes under load; that's fine for a once-a-day nudge.
+    - cron: "0 0 * * *"
+  workflow_dispatch: {} # lets you trigger a run manually from the Actions tab, for testing
+
+jobs:
+  send-reminders:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call the reminders endpoint
+        run: |
+          curl -sf -X POST "https://tonight-mvp.netlify.app/api/cron/reminders" \
+            -H "x-cron-secret: ${{ secrets.CRON_SECRET }}"
+        # Update the URL above if the site ever moves off tonight-mvp.netlify.app.

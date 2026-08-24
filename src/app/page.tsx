@@ -40,6 +40,13 @@ export default async function LandingPage() {
           <Feature icon="🤝" text="新しい出会いではなく、今いる友達ともっと話すためのアプリです" />
         </div>
 
+        <div className="w-full text-left space-y-3">
+          <p className="text-xs text-moon/40 uppercase tracking-wide text-center">使い方</p>
+          <Step number={1} text="今夜〜1週間以内で、話せそうな日と時間を選ぶ" />
+          <Step number={2} text="話したい友達を選ぶ（誰でもOKにもできます）" />
+          <Step number={3} text="相手も同じ気持ちだった時だけ、こっそりマッチをお知らせ" />
+        </div>
+
         <Link
           href="/login"
           className="w-full rounded-xl bg-accent text-night font-medium py-3.5 text-sm hover:brightness-105 transition"
@@ -57,6 +64,17 @@ function Feature({ icon, text }: { icon: string; text: string }) {
   return (
     <div className="flex items-start gap-3">
       <span className="text-lg leading-none shrink-0">{icon}</span>
+      <p className="text-sm text-moon/70 leading-relaxed">{text}</p>
+    </div>
+  );
+}
+
+function Step({ number, text }: { number: number; text: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="flex items-center justify-center h-5 w-5 rounded-full bg-accent-soft text-accent text-[11px] font-medium shrink-0 mt-0.5">
+        {number}
+      </span>
       <p className="text-sm text-moon/70 leading-relaxed">{text}</p>
     </div>
   );

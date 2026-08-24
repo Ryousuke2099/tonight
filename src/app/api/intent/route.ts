@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
 import { createAdminClient } from "@/lib/supabase/admin";
 import { recomputeMatchesForUser } from "@/lib/match";
+import { ensureDemoCompanionsActiveFor } from "@/lib/demo-companions";
 import type { IntentMode, SlotIndex } from "@/types/db";
 
 interface IntentBody {
@@ -107,6 +108,7 @@ export async function POST(request: Request) {
   // Matching requires reading other users' intents/availability — deliberately
   // routed through the service-role admin client, never the RLS-scoped one.
   const admin = createAdminClient();
+  await ensureDemoCompanionsActiveFor(admin, body.date);
   const matches = await recomputeMatchesForUser(admin, user.id, body.date);
 
   return NextResponse.json({ matches });

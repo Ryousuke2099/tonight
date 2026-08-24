@@ -28,6 +28,12 @@ export default function MatchCard({ match }: { match: MatchWithFriend }) {
         <p className="text-xs text-moon/50 mt-0.5">2人とも話せる時間</p>
       </div>
 
+      {match.friend.is_demo && (
+        <p className="text-xs text-moon/40 text-center -mt-2">
+          🌙 これはTonightのサンプル相手です。実際の友達を招待すると、こんな風にマッチが届きます。
+        </p>
+      )}
+
       <div className="flex gap-2">
         <a
           href={lineShareUrl(message)}

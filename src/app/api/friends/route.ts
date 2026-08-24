@@ -23,7 +23,7 @@ export async function GET() {
 
   const { data: profiles, error: profileError } = await supabase
     .from("profiles")
-    .select("id, name, avatar_url")
+    .select("id, name, avatar_url, is_demo")
     .in("id", friendIds);
 
   if (profileError) return NextResponse.json({ error: profileError.message }, { status: 500 });
@@ -99,7 +99,7 @@ export async function POST(request: Request) {
 
   const { data: profile, error: profileError } = await admin
     .from("profiles")
-    .select("id, name, avatar_url")
+    .select("id, name, avatar_url, is_demo")
     .eq("id", target.id)
     .single();
   if (profileError) {

@@ -6,6 +6,7 @@ export interface FriendOption {
   id: string;
   name: string;
   avatar_url: string | null;
+  is_demo?: boolean;
 }
 
 interface FriendSelectorProps {
@@ -40,7 +41,12 @@ export default function FriendSelector({ friends, selectedIds, onToggle }: Frien
             ].join(" ")}
           >
             <Avatar src={f.avatar_url} name={f.name} />
-            <span className="flex-1 text-sm text-moon">{f.name}</span>
+            <span className="flex-1 text-sm text-moon">
+              {f.name}
+              {f.is_demo && (
+                <span className="ml-1.5 text-[10px] text-accent/70 align-middle">🌙 サンプル</span>
+              )}
+            </span>
             <span
               className={[
                 "h-5 w-5 rounded-full border flex items-center justify-center text-[10px] shrink-0",

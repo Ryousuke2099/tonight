@@ -90,8 +90,12 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: intentError?.message ?? "failed to save intent" }, { status: 500 });
   }
 
+  // Targets are saved regardless of mode now: in 'selected' mode they're a
+  // hard restriction (who counts as a candidate at all); in 'anyone' mode
+  // they're an optional priority list (who gets sorted/badged first if a
+  // match happens) — see recomputeMatchesForUser / getMatchesForUser.
   await supabase.from("intent_targets").delete().eq("intent_id", intent.id);
-  if (body.mode === "selected" && body.targetIds.length > 0) {
+  if (body.targetIds.length > 0) {
     await supabase.from("intent_targets").insert(
       body.targetIds.map((targetId) => ({ intent_id: intent.id, target_user_id: targetId }))
     );

@@ -22,8 +22,6 @@ create table if not exists public.profiles (
 -- for the other half (keeping those companions' daily intent fresh).
 create or replace function public.handle_new_user()
 returns trigger as $$
-declare
-  companion_email text;
 begin
   insert into public.profiles (id, name, avatar_url, is_demo)
   values (
@@ -34,18 +32,23 @@ begin
   )
   on conflict (id) do nothing;
 
+  -- Deliberately reads public.profiles (not auth.users) to find the demo
+  -- companions: querying auth.users from inside this trigger (i.e. mid
+  -- INSERT into auth.users, invoked by GoTrue) causes "Database error
+  -- saving new user" on every signup — auth.users isn't safely readable
+  -- from here even though the SECURITY DEFINER function can read it fine
+  -- from a plain SQL Editor session. profiles has everything needed
+  -- (is_demo + name) and is always safe to query.
   if new.email not like '%@tonight.demo' then
-    for companion_email in
-      select unnest(array['haru@tonight.demo', 'yuki@tonight.demo', 'mei@tonight.demo', 'ren@tonight.demo'])
-    loop
-      insert into public.friendships (user_id, friend_id)
-      select new.id, u.id from auth.users u where u.email = companion_email
-      on conflict (user_id, friend_id) do nothing;
+    insert into public.friendships (user_id, friend_id)
+    select new.id, p.id from public.profiles p
+    where p.is_demo = true and p.name in ('Haru', 'Yuki', 'Mei', 'Ren')
+    on conflict (user_id, friend_id) do nothing;
 
-      insert into public.friendships (user_id, friend_id)
-      select u.id, new.id from auth.users u where u.email = companion_email
-      on conflict (user_id, friend_id) do nothing;
-    end loop;
+    insert into public.friendships (user_id, friend_id)
+    select p.id, new.id from public.profiles p
+    where p.is_demo = true and p.name in ('Haru', 'Yuki', 'Mei', 'Ren')
+    on conflict (user_id, friend_id) do nothing;
   end if;
 
   return new;
@@ -259,8 +262,24 @@ create policy "read responses to own invites"
 -- Realtime: broadcast changes on matches + guest_responses so clients can
 -- subscribe instead of polling.
 -- ─────────────────────────────────────────────────────────────────────────
-alter publication supabase_realtime add table public.matches;
-alter publication supabase_realtime add table public.guest_responses;
+-- Wrapped in existence checks so this file stays safe to re-run — `alter
+-- publication ... add table` errors (42710) if the table is already a
+-- member, unlike the create/drop-if-exists statements elsewhere here.
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'matches'
+  ) then
+    alter publication supabase_realtime add table public.matches;
+  end if;
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime' and schemaname = 'public' and tablename = 'guest_responses'
+  ) then
+    alter publication supabase_realtime add table public.guest_responses;
+  end if;
+end $$;
 
 -- ─────────────────────────────────────────────────────────────────────────
 -- One-time backfill for the demo-companion changes above, so re-running
@@ -268,6 +287,8 @@ alter publication supabase_realtime add table public.guest_responses;
 -- flags existing @tonight.demo profiles as is_demo, and (b) auto-friends
 -- existing real users with the demo companions too — not just future
 -- signups going through the trigger. Both are idempotent (safe to re-run).
+-- Run from a plain SQL Editor session (not a trigger), so — unlike inside
+-- handle_new_user() — reading auth.users here is fine.
 -- ─────────────────────────────────────────────────────────────────────────
 update public.profiles p
 set is_demo = true
@@ -276,20 +297,17 @@ where u.id = p.id and u.email like '%@tonight.demo' and p.is_demo = false;
 
 do $$
 declare
-  companion_email text;
   real_user record;
 begin
-  for real_user in select id, email from auth.users where email not like '%@tonight.demo' loop
-    for companion_email in
-      select unnest(array['haru@tonight.demo', 'yuki@tonight.demo', 'mei@tonight.demo', 'ren@tonight.demo'])
-    loop
-      insert into public.friendships (user_id, friend_id)
-      select real_user.id, u.id from auth.users u where u.email = companion_email
-      on conflict (user_id, friend_id) do nothing;
+  for real_user in select id from auth.users where email not like '%@tonight.demo' loop
+    insert into public.friendships (user_id, friend_id)
+    select real_user.id, p.id from public.profiles p
+    where p.is_demo = true and p.name in ('Haru', 'Yuki', 'Mei', 'Ren')
+    on conflict (user_id, friend_id) do nothing;
 
-      insert into public.friendships (user_id, friend_id)
-      select u.id, real_user.id from auth.users u where u.email = companion_email
-      on conflict (user_id, friend_id) do nothing;
-    end loop;
+    insert into public.friendships (user_id, friend_id)
+    select p.id, real_user.id from public.profiles p
+    where p.is_demo = true and p.name in ('Haru', 'Yuki', 'Mei', 'Ren')
+    on conflict (user_id, friend_id) do nothing;
   end loop;
 end $$;

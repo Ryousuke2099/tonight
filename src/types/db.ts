@@ -61,6 +61,11 @@ export interface Match {
 
 export interface MatchWithFriend extends Match {
   friend: Pick<Profile, "id" | "name" | "avatar_url" | "is_demo">;
+  /** True if the caller listed this friend in their own intent_targets for
+   * this date — meaningful in BOTH modes: a hard restriction in 'selected'
+   * mode, an optional priority pick in 'anyone' mode. Used to sort/badge
+   * matches, never to gate whether a match happens. */
+  preferred: boolean;
 }
 
 export interface InviteLink {

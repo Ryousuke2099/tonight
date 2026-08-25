@@ -13,7 +13,9 @@ import { tonightDateJST, formatDateJa, formatDateShortJa, nextNDatesJST } from "
 import { summarizeSlots } from "@/lib/slots";
 import type { IntentMode, MatchWithFriend, SlotIndex } from "@/types/db";
 
-type Step = "mode" | "availability" | "friends" | "status";
+type Step = "mode" | "friends" | "availability" | "status";
+
+const HOWTO_SEEN_KEY = "tonight_seen_howto";
 
 export default function HomeClient({
   me,
@@ -25,7 +27,11 @@ export default function HomeClient({
   const dateOptions = useMemo(() => nextNDatesJST(7), []);
   const [date, setDate] = useState(() => tonightDateJST());
 
-  const [loading, setLoading] = useState(true);
+  // initialLoading blanks the whole screen only on first mount. Switching
+  // dates afterwards uses dateLoading instead (a light overlay), so picking
+  // a different date doesn't feel like the whole app reloading.
+  const [initialLoading, setInitialLoading] = useState(true);
+  const [dateLoading, setDateLoading] = useState(false);
   const [step, setStep] = useState<Step>("mode");
   const [mode, setMode] = useState<IntentMode>("selected");
   const [slots, setSlots] = useState<SlotIndex[]>([]);
@@ -34,6 +40,28 @@ export default function HomeClient({
   const [matches, setMatches] = useState<MatchWithFriend[]>([]);
   const [submitted, setSubmitted] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [savedDates, setSavedDates] = useState<Set<string>>(new Set());
+  const [toast, setToast] = useState(false);
+  const [showHowTo, setShowHowTo] = useState(false);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        if (localStorage.getItem(HOWTO_SEEN_KEY) !== "1") setShowHowTo(true);
+      } catch {
+        setShowHowTo(true);
+      }
+    })();
+  }, []);
+
+  function dismissHowTo() {
+    setShowHowTo(false);
+    try {
+      localStorage.setItem(HOWTO_SEEN_KEY, "1");
+    } catch {
+      // best-effort only — not critical if it can't persist
+    }
+  }
 
   const refreshMatches = useCallback(async () => {
     const res = await fetch(`/api/matches?date=${date}`);
@@ -42,6 +70,14 @@ export default function HomeClient({
       setMatches(matches ?? []);
     }
   }, [date]);
+
+  const refreshSavedDates = useCallback(async () => {
+    const res = await fetch(`/api/intent/dates?dates=${dateOptions.join(",")}`);
+    if (res.ok) {
+      const { dates } = await res.json();
+      setSavedDates(new Set<string>(dates ?? []));
+    }
+  }, [dateOptions]);
 
   useEffect(() => {
     (async () => {
@@ -63,10 +99,11 @@ export default function HomeClient({
           setStep("status");
         }
       }
-      await refreshMatches();
-      setLoading(false);
+      await Promise.all([refreshMatches(), refreshSavedDates()]);
+      setInitialLoading(false);
+      setDateLoading(false);
     })();
-  }, [date, refreshMatches]);
+  }, [date, refreshMatches, refreshSavedDates]);
 
   useEffect(() => {
     const channel = supabase
@@ -92,7 +129,9 @@ export default function HomeClient({
     const res = await fetch("/api/intent", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ date, mode, targetIds: mode === "selected" ? targetIds : [], slots }),
+      // targetIds go through regardless of mode now — a hard restriction in
+      // 'selected' mode, an optional priority list in 'anyone' mode.
+      body: JSON.stringify({ date, mode, targetIds, slots }),
     });
     setSaving(false);
     if (res.ok) {
@@ -100,15 +139,15 @@ export default function HomeClient({
       setMatches(matches ?? []);
       setSubmitted(true);
       setStep("status");
+      setSavedDates((prev) => new Set(prev).add(date));
+      setToast(true);
+      setTimeout(() => setToast(false), 2000);
     }
   }
 
   function changeDate(d: string) {
     if (d === date) return;
-    // Reset the wizard to defaults before switching — each date has its
-    // own, independent intent/availability, so we shouldn't carry over
-    // what was picked for a different day.
-    setLoading(true);
+    setDateLoading(true);
     setStep("mode");
     setMode("selected");
     setSlots([]);
@@ -124,8 +163,9 @@ export default function HomeClient({
   }
 
   const dateLabel = formatDateJa(date);
+  const targetNames = friends.filter((f) => targetIds.includes(f.id)).map((f) => f.name);
 
-  if (loading) {
+  if (initialLoading) {
     return (
       <main className="min-h-dvh flex items-center justify-center">
         <p className="text-moon/40 text-sm">読み込み中…</p>
@@ -147,91 +187,80 @@ export default function HomeClient({
         </div>
 
         <div>
-          <div className="flex gap-1.5 overflow-x-auto">
+          <div className="flex gap-1.5 overflow-x-auto snap-x snap-mandatory pb-1">
             {dateOptions.map((d) => (
               <button
                 key={d}
                 onClick={() => changeDate(d)}
                 className={[
-                  "shrink-0 rounded-full px-3 py-1.5 text-xs transition-colors",
+                  "shrink-0 snap-start rounded-full px-3 py-1.5 text-xs transition-colors relative",
                   d === date ? "bg-accent text-night font-medium" : "bg-white/5 text-moon/60 hover:bg-white/10",
                 ].join(" ")}
               >
                 {formatDateShortJa(d)}
+                {savedDates.has(d) && (
+                  <span
+                    aria-hidden
+                    className={[
+                      "absolute -bottom-0.5 left-1/2 -translate-x-1/2 h-1 w-1 rounded-full",
+                      d === date ? "bg-night" : "bg-accent",
+                    ].join(" ")}
+                  />
+                )}
               </button>
             ))}
           </div>
-          <p className="text-xs text-moon/40 mt-1.5">{formatDateJa(date)}の予定</p>
+          <p className="text-xs text-moon/40 mt-1.5">{dateLabel}の予定</p>
         </div>
       </header>
 
-      <div className="flex-1 px-5 pb-10">
+      <div
+        className={[
+          "flex-1 px-5 pb-10 transition-opacity",
+          dateLoading ? "opacity-40 pointer-events-none" : "",
+        ].join(" ")}
+      >
         {step === "mode" && (
           <ModeStep
             mode={mode}
             dateLabel={dateLabel}
+            showHowTo={showHowTo}
+            onDismissHowTo={dismissHowTo}
             onSelect={(m) => {
               setMode(m);
-              setStep("availability");
+              setStep("friends");
             }}
+          />
+        )}
+
+        {step === "friends" && (
+          <FriendsStep
+            mode={mode}
+            dateLabel={dateLabel}
+            friends={friends}
+            targetIds={targetIds}
+            onToggle={(id) =>
+              setTargetIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
+            }
+            onAdded={(f) => setFriends((prev) => (prev.some((p) => p.id === f.id) ? prev : [...prev, f]))}
+            onBack={() => setStep("mode")}
+            onNext={() => setStep("availability")}
           />
         )}
 
         {step === "availability" && (
           <div className="space-y-6">
-            <StepHeader
-              title={`${dateLabel}、話せる時間は？`}
-              subtitle="20:00〜翌2:00の間で、話せそうな時間を選んでください"
-            />
+            <StepHeader title={`${dateLabel}、話せる時間は？`} />
             <AvailabilityPicker value={slots} onChange={setSlots} />
             <div className="flex gap-2">
               <button
-                onClick={() => setStep("mode")}
+                onClick={() => setStep("friends")}
                 className="rounded-xl bg-white/5 text-moon/70 text-sm px-4 py-3"
               >
                 戻る
               </button>
               <button
-                disabled={slots.length === 0}
-                onClick={() => (mode === "selected" ? setStep("friends") : submit())}
-                className="flex-1 rounded-xl bg-accent text-night font-medium py-3 text-sm disabled:opacity-30 disabled:cursor-not-allowed"
-              >
-                {saving ? "保存中…" : "次へ"}
-              </button>
-            </div>
-          </div>
-        )}
-
-        {step === "friends" && (
-          <div className="space-y-6">
-            <StepHeader title={`${dateLabel}、誰と話したい？`} subtitle="複数選べます" />
-            <p className="text-xs text-moon/40 bg-white/[0.03] rounded-xl px-4 py-3">
-              🔒 あなたが選んだことは、マッチするまで相手にはわかりません
-            </p>
-            <FriendSelector
-              friends={friends}
-              selectedIds={targetIds}
-              onToggle={(id) =>
-                setTargetIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]))
-              }
-            />
-            <AddFriendForm
-              onAdded={(f) =>
-                setFriends((prev) => (prev.some((p) => p.id === f.id) ? prev : [...prev, f]))
-              }
-            />
-            <Link href="/invite" className="block text-center text-xs text-accent/80 underline underline-offset-4">
-              友達がいない？招待リンクを作る
-            </Link>
-            <div className="flex gap-2">
-              <button
-                onClick={() => setStep("availability")}
-                className="rounded-xl bg-white/5 text-moon/70 text-sm px-4 py-3"
-              >
-                戻る
-              </button>
-              <button
-                disabled={targetIds.length === 0 || saving}
+                disabled={slots.length === 0 || saving}
                 onClick={submit}
                 className="flex-1 rounded-xl bg-accent text-night font-medium py-3 text-sm disabled:opacity-30 disabled:cursor-not-allowed"
               >
@@ -245,7 +274,7 @@ export default function HomeClient({
           <StatusStep
             mode={mode}
             slots={slots}
-            targetCount={targetIds.length}
+            targetNames={targetNames}
             matches={matches}
             submitted={submitted}
             dateLabel={dateLabel}
@@ -253,6 +282,12 @@ export default function HomeClient({
           />
         )}
       </div>
+
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 bg-accent text-night text-sm font-medium px-4 py-2 rounded-full shadow-lg">
+          保存しました 🌙
+        </div>
+      )}
     </main>
   );
 }
@@ -269,20 +304,36 @@ function StepHeader({ title, subtitle }: { title: string; subtitle?: string }) {
 function ModeStep({
   mode,
   dateLabel,
+  showHowTo,
+  onDismissHowTo,
   onSelect,
 }: {
   mode: IntentMode;
   dateLabel: string;
+  showHowTo: boolean;
+  onDismissHowTo: () => void;
   onSelect: (m: IntentMode) => void;
 }) {
   return (
     <div className="space-y-6 pt-4">
+      {showHowTo && (
+        <div className="rounded-2xl bg-card/80 p-4 space-y-2.5 border border-accent/20">
+          <p className="text-xs text-accent uppercase tracking-wide">はじめに</p>
+          <ol className="space-y-1.5 text-sm text-moon/70">
+            <li>① 上の日付から、話せる日を選ぶ</li>
+            <li>② 誰と話したいか選ぶ</li>
+            <li>③ 気持ちが重なったら、こっそり教えます</li>
+          </ol>
+          <button onClick={onDismissHowTo} className="text-xs text-accent/80 underline underline-offset-4">
+            わかった
+          </button>
+        </div>
+      )}
+
       <div className="space-y-1">
         <p className="text-3xl">🌙</p>
         <h2 className="text-xl font-medium text-moon">{dateLabel}、誰かと話したい？</h2>
-        <p className="text-sm text-moon/50">
-          相手も話したい時だけ、つながります。あなたの気持ちが一方的に伝わることはありません。
-        </p>
+        <p className="text-sm text-moon/50">相手も同じ気持ちの時だけ、つながります。</p>
       </div>
 
       <div className="space-y-3">
@@ -296,7 +347,7 @@ function ModeStep({
         <OptionCard
           emoji="🎯"
           title="話したい友達を選ぶ"
-          description="特定の友達を選んで、今夜の気持ちを伝える"
+          description="特定の友達を選ぶ"
           selected={mode === "selected"}
           onClick={() => onSelect("selected")}
         />
@@ -335,10 +386,66 @@ function OptionCard({
   );
 }
 
+function FriendsStep({
+  mode,
+  dateLabel,
+  friends,
+  targetIds,
+  onToggle,
+  onAdded,
+  onBack,
+  onNext,
+}: {
+  mode: IntentMode;
+  dateLabel: string;
+  friends: FriendOption[];
+  targetIds: string[];
+  onToggle: (id: string) => void;
+  onAdded: (f: FriendOption) => void;
+  onBack: () => void;
+  onNext: () => void;
+}) {
+  const isSelected = mode === "selected";
+  const canProceed = !isSelected || targetIds.length > 0;
+
+  return (
+    <div className="space-y-6">
+      <StepHeader
+        title={isSelected ? `${dateLabel}、誰と話したい？` : "優先したい友達はいる？"}
+        subtitle={isSelected ? undefined : "任意。マッチした時に優先して表示します"}
+      />
+      {isSelected && (
+        <p className="text-xs text-moon/40 bg-white/[0.03] rounded-xl px-4 py-3">
+          🔒 あなたが選んだことは、マッチするまで相手にはわかりません
+        </p>
+      )}
+      <FriendSelector friends={friends} selectedIds={targetIds} onToggle={onToggle} />
+      <AddFriendForm onAdded={onAdded} />
+      {isSelected && (
+        <Link href="/invite" className="block text-center text-xs text-accent/80 underline underline-offset-4">
+          友達がいない？招待リンクを作る
+        </Link>
+      )}
+      <div className="flex gap-2">
+        <button onClick={onBack} className="rounded-xl bg-white/5 text-moon/70 text-sm px-4 py-3">
+          戻る
+        </button>
+        <button
+          disabled={!canProceed}
+          onClick={onNext}
+          className="flex-1 rounded-xl bg-accent text-night font-medium py-3 text-sm disabled:opacity-30 disabled:cursor-not-allowed"
+        >
+          {isSelected ? "次へ" : targetIds.length > 0 ? "次へ" : "スキップ"}
+        </button>
+      </div>
+    </div>
+  );
+}
+
 function StatusStep({
   mode,
   slots,
-  targetCount,
+  targetNames,
   matches,
   submitted,
   dateLabel,
@@ -346,7 +453,7 @@ function StatusStep({
 }: {
   mode: IntentMode;
   slots: SlotIndex[];
-  targetCount: number;
+  targetNames: string[];
   matches: MatchWithFriend[];
   submitted: boolean;
   dateLabel: string;
@@ -381,9 +488,7 @@ function StatusStep({
         <div className="rounded-2xl bg-card p-4 space-y-2">
           <p className="text-xs text-moon/40 uppercase tracking-wide">{dateLabel}の設定</p>
           <p className="text-moon text-sm">{summary || "時間未設定"}</p>
-          <p className="text-moon/60 text-sm">
-            {mode === "anyone" ? "友達なら誰とでも話したい" : `${targetCount}人となら話したい`}
-          </p>
+          <p className="text-moon/60 text-sm">{summarizeTargets(mode, targetNames)}</p>
         </div>
       )}
 
@@ -400,4 +505,19 @@ function StatusStep({
       </div>
     </div>
   );
+}
+
+function summarizeTargets(mode: IntentMode, names: string[]): string {
+  if (mode === "anyone") {
+    return names.length === 0
+      ? "友達なら誰とでも話したい"
+      : `友達なら誰でも話したい（${namesText(names)}を優先）`;
+  }
+  return `${namesText(names)}と話したい`;
+}
+
+function namesText(names: string[]): string {
+  if (names.length === 0) return "";
+  if (names.length <= 2) return names.join("、");
+  return `${names.slice(0, 2).join("、")}他${names.length - 2}人`;
 }

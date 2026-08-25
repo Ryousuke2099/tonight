@@ -25,6 +25,24 @@ export async function GET(request: Request) {
   if (error) return NextResponse.json({ error: error.message }, { status: 500 });
   if (!matches || matches.length === 0) return NextResponse.json({ matches: [] });
 
+  // Same "preferred" derivation as getMatchesForUser in lib/match.ts —
+  // duplicated here since this route reads with the RLS-scoped client
+  // rather than the service-role one.
+  const { data: myIntent } = await supabase
+    .from("daily_intents")
+    .select("id")
+    .eq("user_id", user.id)
+    .eq("date", date)
+    .maybeSingle();
+  let preferredIds = new Set<string>();
+  if (myIntent) {
+    const { data: myTargets } = await supabase
+      .from("intent_targets")
+      .select("target_user_id")
+      .eq("intent_id", myIntent.id);
+    preferredIds = new Set((myTargets ?? []).map((t) => t.target_user_id as string));
+  }
+
   const friendIds = matches.map((m) => (m.user_a === user.id ? m.user_b : m.user_a));
   const { data: profiles } = await supabase
     .from("profiles")
@@ -37,8 +55,10 @@ export async function GET(request: Request) {
     return {
       ...m,
       friend: profileMap.get(friendId) ?? { id: friendId, name: "友達", avatar_url: null, is_demo: false },
+      preferred: preferredIds.has(friendId),
     };
   });
+  result.sort((a, b) => Number(b.preferred) - Number(a.preferred) || a.overlap_start - b.overlap_start);
 
   return NextResponse.json({ matches: result });
 }

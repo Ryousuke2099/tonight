@@ -96,14 +96,15 @@ async function getIntentAndAvailability(
     .maybeSingle();
   if (!intent) return null;
 
-  let targets: string[] = [];
-  if (intent.mode === "selected") {
-    const { data: targetRows } = await admin
-      .from("intent_targets")
-      .select("target_user_id")
-      .eq("intent_id", intent.id);
-    targets = (targetRows ?? []).map((t) => t.target_user_id as string);
-  }
+  // Fetched regardless of mode: in 'selected' mode these are the hard
+  // candidate restriction; in 'anyone' mode they're an optional priority
+  // list that doesn't affect whether a match happens, only its display
+  // order (see getMatchesForUser).
+  const { data: targetRows } = await admin
+    .from("intent_targets")
+    .select("target_user_id")
+    .eq("intent_id", intent.id);
+  const targets = (targetRows ?? []).map((t) => t.target_user_id as string);
 
   const { data: availRow } = await admin
     .from("availabilities")
@@ -141,6 +142,25 @@ export async function getMatchesForUser(
 
   if (!matches || matches.length === 0) return [];
 
+  // "Preferred" = friends the caller listed in their own intent_targets for
+  // this date — meaningful in both modes (see recomputeMatchesForUser).
+  // Used only to sort/badge results, never computed by the caller's own
+  // request (this always re-derives from what was actually saved).
+  const { data: myIntent } = await admin
+    .from("daily_intents")
+    .select("id")
+    .eq("user_id", userId)
+    .eq("date", date)
+    .maybeSingle();
+  let preferredIds = new Set<string>();
+  if (myIntent) {
+    const { data: myTargets } = await admin
+      .from("intent_targets")
+      .select("target_user_id")
+      .eq("intent_id", myIntent.id);
+    preferredIds = new Set((myTargets ?? []).map((t) => t.target_user_id as string));
+  }
+
   const friendIds = matches.map((m) => (m.user_a === userId ? m.user_b : m.user_a));
   const { data: profiles } = await admin
     .from("profiles")
@@ -149,7 +169,7 @@ export async function getMatchesForUser(
 
   const profileMap = new Map((profiles ?? []).map((p) => [p.id, p]));
 
-  return matches.map((m) => {
+  const result = matches.map((m) => {
     const friendId = m.user_a === userId ? m.user_b : m.user_a;
     const friend = profileMap.get(friendId) ?? {
       id: friendId,
@@ -157,6 +177,10 @@ export async function getMatchesForUser(
       avatar_url: null,
       is_demo: false,
     };
-    return { ...m, friend } as MatchWithFriend;
+    return { ...m, friend, preferred: preferredIds.has(friendId) } as MatchWithFriend;
   });
+
+  // Preferred matches first, then earliest start time.
+  result.sort((a, b) => Number(b.preferred) - Number(a.preferred) || a.overlap_start - b.overlap_start);
+  return result;
 }

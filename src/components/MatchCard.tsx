@@ -16,7 +16,9 @@ export default function MatchCard({ match }: { match: MatchWithFriend }) {
       <div className="flex items-center gap-3">
         <Avatar src={match.friend.avatar_url} name={match.friend.name} size={48} />
         <div>
-          <p className="text-xs text-accent">🌙 Match</p>
+          <p className="text-xs text-accent">
+            🌙 Match{match.preferred && <span className="ml-1.5 text-moon/50">⭐ 優先</span>}
+          </p>
           <p className="text-moon font-medium">
             {match.friend.name}さんも今夜話したいみたい
           </p>

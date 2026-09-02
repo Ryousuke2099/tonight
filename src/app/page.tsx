@@ -29,6 +29,10 @@ export default async function LandingPage() {
         >
           今夜話せる友達を探す
         </Link>
+
+        <Link href="/diagnosis" className="text-xs text-moon/40 underline underline-offset-4">
+          まずは対人スタイル診断だけ試す（登録不要）
+        </Link>
       </div>
 
       <p className="text-center text-xs text-moon/25 pb-6">Tonight — お互い話したい夜だけ、つながる。</p>

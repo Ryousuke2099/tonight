@@ -11,6 +11,8 @@ import MatchCard from "@/components/MatchCard";
 import Avatar from "@/components/Avatar";
 import { tonightDateJST, formatDateJa, formatDateShortJa, nextNDatesJST } from "@/lib/date";
 import { summarizeSlots } from "@/lib/slots";
+import { takePendingPersonalityType } from "@/lib/pending-personality-type";
+import { VIDEO_STUDIO_URL } from "@/lib/external-links";
 import type { IntentMode, MatchWithFriend, SlotIndex } from "@/types/db";
 
 type Step = "mode" | "friends" | "availability" | "status";
@@ -52,6 +54,19 @@ export default function HomeClient({
         setShowHowTo(true);
       }
     })();
+  }, []);
+
+  // 診断→ログインを経由してここに来た場合（診断は/diaryだけでなくどこ経由で
+  // ログインしても保留分を拾えるよう、こちらでも同期しておく）。
+  useEffect(() => {
+    const pending = takePendingPersonalityType();
+    if (pending) {
+      fetch("/api/profile/personality-type", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ type: pending }),
+      });
+    }
   }, []);
 
   function dismissHowTo() {
@@ -212,6 +227,29 @@ export default function HomeClient({
           </div>
           <p className="text-xs text-moon/40 mt-1.5">{dateLabel}の予定</p>
         </div>
+
+        <nav className="flex gap-1.5 overflow-x-auto pb-1">
+          <Link
+            href="/diary"
+            className="shrink-0 rounded-full bg-white/5 hover:bg-white/10 text-moon/70 text-xs px-3 py-1.5"
+          >
+            📔 交換日記
+          </Link>
+          <Link
+            href="/diagnosis"
+            className="shrink-0 rounded-full bg-white/5 hover:bg-white/10 text-moon/70 text-xs px-3 py-1.5"
+          >
+            🧭 対人スタイル診断
+          </Link>
+          <a
+            href={VIDEO_STUDIO_URL}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="shrink-0 rounded-full bg-white/5 hover:bg-white/10 text-moon/70 text-xs px-3 py-1.5"
+          >
+            🎬 写真を動画にする ↗
+          </a>
+        </nav>
       </header>
 
       <div

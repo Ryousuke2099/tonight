@@ -15,6 +15,7 @@ export interface Profile {
   name: string;
   avatar_url: string | null;
   is_demo: boolean;
+  personality_type: string | null;
   created_at: string;
 }
 
@@ -85,5 +86,45 @@ export interface GuestResponse {
   slots: SlotIndex[];
   overlap_start: SlotIndex | null;
   overlap_end: SlotIndex | null;
+  created_at: string;
+}
+
+// ───────────────────────────────────────────────────────────────────────
+// 交換日記 (diary)
+// ───────────────────────────────────────────────────────────────────────
+
+/** 'a' = 面識のない相手（期間/往復制限あり）, 'b' = 既存の友達（無制限）。 */
+export type DiaryMode = "a" | "b";
+
+export interface DiaryRoom {
+  id: string;
+  user_a: string;
+  user_b: string;
+  mode: DiaryMode;
+  exchange_count: number;
+  max_exchanges: number | null;
+  window_expires_at: string | null;
+  interest_a: boolean;
+  interest_b: boolean;
+  converted_to_friend_at: string | null;
+  closed_at: string | null;
+  created_at: string;
+}
+
+export interface DiaryRoomWithPartner extends DiaryRoom {
+  partner: Pick<Profile, "id" | "name" | "avatar_url" | "is_demo">;
+  /** my_interest / partner_interest — user_a/user_b を呼び出し側から見て
+   * 読みやすくするための派生フィールド（API側で計算して付与）。 */
+  my_interest: boolean;
+  partner_interest: boolean;
+  latest_entry_at: string | null;
+}
+
+export interface DiaryEntry {
+  id: string;
+  room_id: string;
+  author_id: string;
+  prompt: string | null;
+  body: string;
   created_at: string;
 }

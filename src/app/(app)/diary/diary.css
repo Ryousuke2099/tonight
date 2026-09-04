@@ -1,0 +1,233 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family:
+    'Zen Maru Gothic',
+    'Hiragino Maru Gothic ProN',
+    'Hiragino Sans',
+    sans-serif;
+  background: #0a1230;
+}
+
+/* ---------- Diary ---------- */
+
+.diary-page {
+  width: 100%;
+  min-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+/* ---------- Phone ---------- */
+
+.diary-phone {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      120% 60% at 50% 100%,
+      #48619a 0%,
+      #223464 45%,
+      #0d1442 100%
+    );
+
+  color: #eef0fb;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Content ---------- */
+
+.diary-content {
+  padding: 22px 20px 0;
+  flex: 1;
+}
+
+.diary-friend-card {
+  background: rgba(20, 28, 62, 0.55);
+
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 16px;
+
+  padding: 16px 18px;
+
+  text-align: center;
+}
+
+.diary-friend-card h1 {
+  margin: 0;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  color: #cfd3f0;
+}
+
+.diary-friend-card p {
+  margin: 8px 0 0;
+
+  font-size: 12px;
+  line-height: 1.7;
+
+  color: #b7bce0;
+}
+
+/* ---------- Diary Card ---------- */
+
+.diary-card {
+  background: rgba(255, 255, 255, 0.06);
+
+  border-radius: 16px;
+
+  padding: 18px;
+
+  text-align: center;
+
+  margin-top: 16px;
+}
+
+.diary-status {
+  margin: 0 0 16px;
+
+  font-size: 13px;
+
+  color: #dfe1f2;
+}
+
+.diary-action {
+  min-height: 46px;
+
+  display: flex;
+  align-items: center;
+}
+
+.diary-write-btn {
+  display: block;
+
+  width: 100%;
+
+  background:
+    linear-gradient(
+      135deg,
+      #6f7bf2 0%,
+      #4b57d6 100%
+    );
+
+  color: #fff;
+
+  text-decoration: none;
+
+  font-size: 14px;
+  font-weight: 700;
+
+  padding: 14px;
+
+  border-radius: 12px;
+
+  text-align: center;
+}
+
+/* ---------- History ---------- */
+
+.diary-history-row {
+  display: flex;
+  align-items: center;
+
+  gap: 10px;
+
+  background: rgba(255, 255, 255, 0.06);
+
+  border-radius: 14px;
+
+  padding: 14px 18px;
+
+  margin-top: 14px;
+
+  text-decoration: none;
+
+  color: #eef0fb;
+
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.diary-history-icon {
+  flex-shrink: 0;
+}
+
+/* ---------- Footer / Mascot ---------- */
+
+.diary-mascot-row {
+  display: flex;
+  align-items: flex-end;
+
+  gap: 10px;
+
+  padding: 24px 18px 26px;
+
+  margin-top: auto;
+}
+
+.diary-mascot {
+  width: 120px;
+  height: 120px;
+
+  object-fit: contain;
+
+  flex-shrink: 0;
+}
+
+.diary-tip-bubble {
+  position: relative;
+
+  background: #e8e7e2;
+  color: #2b2b3a;
+
+  font-size: 12px;
+  font-weight: 700;
+
+  line-height: 1.6;
+
+  padding: 12px 16px;
+
+  border-radius: 10px;
+
+  margin-bottom: 18px;
+
+  max-width: 190px;
+}
+
+.diary-tip-bubble::after {
+  content: "";
+
+  position: absolute;
+
+  left: -8px;
+  bottom: 12px;
+
+  border-width: 6px 8px 6px 0;
+
+  border-style: solid;
+
+  border-color:
+    transparent
+    #e8e7e2
+    transparent
+    transparent;
+}

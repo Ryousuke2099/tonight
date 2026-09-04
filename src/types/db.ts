@@ -16,6 +16,8 @@ export interface Profile {
   avatar_url: string | null;
   is_demo: boolean;
   personality_type: string | null;
+  /** 交換日記で、友達登録なしに特定の相手を指定するための6桁公開ID。 */
+  public_user_id: string | null;
   created_at: string;
 }
 
@@ -90,41 +92,25 @@ export interface GuestResponse {
 }
 
 // ───────────────────────────────────────────────────────────────────────
-// 交換日記 (diary)
+// 交換日記 (diary) — Woolink 版モデル(HamstarCode/woolink-Tornado2026-TeamH
+// commit 327ae85 を移植)。毎晩20:00〜翌20:00の1本勝負: 1人1晩1提出、
+// 相手を公開IDで指定するか、性格タイプで自動マッチング。
 // ───────────────────────────────────────────────────────────────────────
-
-/** 'a' = 面識のない相手（期間/往復制限あり）, 'b' = 既存の友達（無制限）。 */
-export type DiaryMode = "a" | "b";
 
 export interface DiaryRoom {
   id: string;
-  user_a: string;
-  user_b: string;
-  mode: DiaryMode;
-  exchange_count: number;
-  max_exchanges: number | null;
-  window_expires_at: string | null;
-  interest_a: boolean;
-  interest_b: boolean;
-  converted_to_friend_at: string | null;
-  closed_at: string | null;
+  user_a_id: string;
+  user_b_id: string;
+  started_at: string;
+  ended_at: string;
   created_at: string;
 }
 
-export interface DiaryRoomWithPartner extends DiaryRoom {
-  partner: Pick<Profile, "id" | "name" | "avatar_url" | "is_demo">;
-  /** my_interest / partner_interest — user_a/user_b を呼び出し側から見て
-   * 読みやすくするための派生フィールド（API側で計算して付与）。 */
-  my_interest: boolean;
-  partner_interest: boolean;
-  latest_entry_at: string | null;
-}
-
-export interface DiaryEntry {
+export interface DiarySubmission {
   id: string;
-  room_id: string;
-  author_id: string;
-  prompt: string | null;
-  body: string;
+  user_id: string;
+  diary: string;
+  target_public_user_id: string | null;
+  room_id: string | null;
   created_at: string;
 }

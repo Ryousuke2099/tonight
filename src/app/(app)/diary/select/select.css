@@ -1,0 +1,174 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family:
+    'Zen Maru Gothic',
+    'Hiragino Maru Gothic ProN',
+    'Hiragino Sans',
+    sans-serif;
+  background: #0a1230;
+}
+
+.select-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.select-phone {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  overflow: hidden;
+  background:
+    radial-gradient(
+      120% 60% at 50% 100%,
+      #48619a 0%,
+      #223464 45%,
+      #0d1442 100%
+    );
+  color: #eef0fb;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 28px 20px 20px;
+  display: flex;
+  flex-direction: column;
+}
+
+.page-title {
+  margin: 8px 0 24px;
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: #eef0fb;
+}
+
+.method-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+
+.method-tile {
+  min-height: 150px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  color: #eef0fb;
+  text-decoration: none;
+  transition:
+    transform 0.15s ease,
+    background 0.15s ease;
+}
+
+.method-tile:active {
+  transform: scale(0.97);
+  background: rgba(255, 255, 255, 0.11);
+}
+
+.method-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.method-label {
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mascot-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+
+  /* 羊を少し下へ */
+  margin-top: auto;
+  padding: 80px 0 4px;
+}
+
+.mascot {
+  width: 120px;
+  height: 120px;
+  object-fit: contain;
+  flex-shrink: 0;
+}
+
+.tip-bubble {
+  position: relative;
+  max-width: 190px;
+  margin-bottom: 20px;
+  padding: 12px 15px;
+
+  background: #e8e7e2;
+  color: #2b2b3a;
+
+  border-radius: 10px;
+
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+.tip-bubble::after {
+  content: "";
+  position: absolute;
+  left: -8px;
+  bottom: 12px;
+
+  border-width: 6px 8px 6px 0;
+  border-style: solid;
+  border-color:
+    transparent
+    #e8e7e2
+    transparent
+    transparent;
+}
+
+.back-btn-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+
+  border: none;
+  background: none;
+  color: #cfd3f0;
+
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+
+  padding: 8px 14px;
+  cursor: pointer;
+}
+
+.back-btn:active {
+  opacity: 0.7;
+}

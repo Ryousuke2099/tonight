@@ -7,7 +7,12 @@ import Avatar from "@/components/Avatar";
 import WoolinkScreen from "@/components/WoolinkScreen";
 import { TYPE_DATA, BALANCE_TYPE } from "@/lib/personality/data-types";
 
-type ProfileRow = { name: string; avatar_url: string | null; personality_type: string | null };
+type ProfileRow = {
+  name: string;
+  avatar_url: string | null;
+  personality_type: string | null;
+  public_user_id: string | null;
+};
 
 function typeLabel(pt: string | null): string {
   if (!pt) return "未診断";
@@ -20,6 +25,7 @@ export default function ProfilePage() {
   const supabase = useMemo(() => createClient(), []);
   const [profile, setProfile] = useState<ProfileRow | null>(null);
   const [friendCount, setFriendCount] = useState<number | null>(null);
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -29,7 +35,7 @@ export default function ProfilePage() {
       if (user) {
         const { data } = await supabase
           .from("profiles")
-          .select("name, avatar_url, personality_type")
+          .select("name, avatar_url, personality_type, public_user_id")
           .eq("id", user.id)
           .maybeSingle();
         setProfile(data as ProfileRow | null);
@@ -66,6 +72,47 @@ export default function ProfilePage() {
 
       {row("対人スタイル", typeLabel(profile?.personality_type ?? null))}
       {row("友達", friendCount === null ? "…" : `${friendCount}人`)}
+
+      {profile?.public_user_id && (
+        <div style={{ marginTop: 16 }}>
+          <p style={{ fontSize: 12, color: "#b7bce0", margin: "0 0 6px" }}>
+            公開ID（交換日記でこの相手に送りたい、と伝えるときに使えます）
+          </p>
+          <button
+            type="button"
+            onClick={async () => {
+              try {
+                await navigator.clipboard.writeText(profile.public_user_id!);
+                setCopied(true);
+                setTimeout(() => setCopied(false), 1500);
+              } catch {
+                // クリップボード権限が無い環境では静かに諦める
+              }
+            }}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              width: "100%",
+              padding: "12px 16px",
+              borderRadius: 12,
+              border: "1px solid rgba(255,255,255,0.14)",
+              background: "rgba(20,28,62,0.55)",
+              color: "#eef0fb",
+              fontSize: 16,
+              fontWeight: 700,
+              letterSpacing: "0.08em",
+              fontFamily: "inherit",
+              cursor: "pointer",
+            }}
+          >
+            <span>{profile.public_user_id}</span>
+            <span style={{ fontSize: 12, fontWeight: 400, color: "#9fa5c8" }}>
+              {copied ? "コピーしました" : "タップでコピー"}
+            </span>
+          </button>
+        </div>
+      )}
 
       <Link
         href="/personality"

@@ -1,0 +1,284 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: hidden;
+  font-family:
+    'Zen Maru Gothic',
+    'Hiragino Maru Gothic ProN',
+    'Hiragino Sans',
+    sans-serif;
+  background: #0a1230;
+}
+
+.friend-page {
+  width: 100%;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.friend-phone {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  height: calc(100vh - 62px);
+  height: calc(100dvh - 62px);
+  overflow: hidden;
+  background:
+    radial-gradient(
+      120% 60% at 50% 100%,
+      #48619a 0%,
+      #223464 45%,
+      #0d1442 100%
+    );
+  color: #eef0fb;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Content ---------- */
+
+.content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 20px 24px;
+}
+
+/* ---------- Back button ---------- */
+
+.back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #eef0fb;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 8px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.back-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* ---------- Content preview ---------- */
+
+.content-preview {
+  margin-top: 14px;
+  height: 150px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  overflow-y: auto;
+  padding: 16px;
+}
+
+.content-preview p {
+  margin: 0;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: #c7cae4;
+}
+
+.content-preview .diary-preview-text {
+  width: 100%;
+  color: #eef0fb;
+  text-align: left;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* ---------- Section titles ---------- */
+
+.section-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 18px 0 8px;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: #c7cae4;
+}
+
+.section-title.center {
+  justify-content: center;
+  font-size: 13px;
+  color: #eef0fb;
+  margin-top: 16px;
+}
+
+/* ---------- Stranger button ---------- */
+
+.stranger-btn {
+  display: block;
+  width: 100%;
+  background:
+    linear-gradient(
+      135deg,
+      #6f7bf2 0%,
+      #4b57d6 100%
+    );
+  color: #fff;
+  border: 2px solid transparent;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 14px;
+  border-radius: 12px;
+  cursor: pointer;
+}
+
+.stranger-btn.is-selected {
+  border-color: #f2c94c;
+}
+
+/* ---------- Friend input ---------- */
+
+.friend-input {
+  display: block;
+  width: 100%;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 10px;
+  padding: 12px 14px;
+  color: #eef0fb;
+  font-family: inherit;
+  font-size: 13px;
+}
+
+.friend-input::placeholder {
+  color: #6d7290;
+}
+
+.friend-input:focus {
+  outline: none;
+  border-color: #6f7bf2;
+}
+
+.recipient-help {
+  margin: 8px 2px 0;
+  color: #9fa5c8;
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+.submit-error {
+  margin: 16px 2px 0;
+  color: #ffd0d0;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.6;
+}
+
+/* ---------- Avatar rows ---------- */
+
+.avatar-row {
+  display: flex;
+  gap: 18px;
+  flex-wrap: wrap;
+}
+
+.avatar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: none;
+  padding: 4px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  border: 2px solid transparent;
+}
+
+.avatar-a {
+  background: #3c5a68;
+}
+
+.avatar-b {
+  background: #4a4270;
+}
+
+.avatar-c {
+  background: #35507a;
+}
+
+.avatar-d {
+  background: #52406e;
+}
+
+.avatar-item.is-selected .avatar {
+  border-color: #f2c94c;
+  box-shadow:
+    0 0 0 2px rgba(242, 201, 76, 0.3);
+}
+
+.avatar-name {
+  font-size: 10.5px;
+  color: #c7cae4;
+}
+
+.avatar-item.is-selected .avatar-name {
+  color: #f2c94c;
+  font-weight: 700;
+}
+
+/* ---------- Send button ---------- */
+
+.send-btn {
+  display: block;
+  width: 100%;
+  text-align: center;
+  margin-top: 26px;
+  background:
+    linear-gradient(
+      135deg,
+      #6f7bf2 0%,
+      #4b57d6 100%
+    );
+  color: #fff;
+  border: none;
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  padding: 14px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.send-btn.is-disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}

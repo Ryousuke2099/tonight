@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { VIDEO_STUDIO_URL } from "@/lib/external-links";
 import "./select.css";
 
 export default function DiarySelectPage() {
@@ -27,12 +28,14 @@ export default function DiarySelectPage() {
               <span className="method-label">文章で</span>
             </Link>
 
-            {/* 写真から作る機能はまだ未実装（写真→動画は別アプリ「写真を動画にする」で提供）。
-                タイルは残しつつ、押せないことが分かるようにしておく。 */}
-            <span
+            {/* 写真→動画は Express/FFmpeg を伴う別アーキテクチャなのでこの
+                リポジトリには取り込まず、独立デプロイの video-diary アプリへ
+                外部リンクで誘導する（src/lib/external-links.ts 参照）。 */}
+            <a
               className="method-tile"
-              aria-disabled="true"
-              style={{ opacity: 0.4, cursor: "not-allowed", pointerEvents: "none" }}
+              href={VIDEO_STUDIO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
             >
               <span className="method-illustration" aria-hidden="true">
                 <svg viewBox="0 0 48 48" width="40" height="40">
@@ -41,8 +44,8 @@ export default function DiarySelectPage() {
                   <circle cx="24" cy="26" r="7" fill="none" stroke="#eef0fb" strokeWidth="2.4" />
                 </svg>
               </span>
-              <span className="method-label">写真から（準備中）</span>
-            </span>
+              <span className="method-label">写真から ↗</span>
+            </a>
           </section>
 
           <footer className="mascot-row">

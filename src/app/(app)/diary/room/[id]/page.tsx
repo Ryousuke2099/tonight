@@ -8,7 +8,7 @@ export default async function DiaryRoomPage({ params }: { params: Promise<{ id: 
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   return <RoomClient roomId={id} meId={user.id} />;
 }

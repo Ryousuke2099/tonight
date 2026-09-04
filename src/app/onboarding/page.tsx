@@ -70,7 +70,7 @@ export default function OnboardingPage() {
           <button
             type="button"
             className="welcome-next-btn"
-            onClick={() => router.push("/diagnosis")}
+            onClick={() => router.push("/personality")}
           >
             診断を受ける
           </button>

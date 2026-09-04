@@ -7,7 +7,7 @@ export default async function QueuePage() {
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
   return <QueueClient />;
 }

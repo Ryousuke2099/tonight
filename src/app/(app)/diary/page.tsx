@@ -1,13 +1,13 @@
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import NewDiaryClient from "./NewDiaryClient";
+import DiaryClient from "./DiaryClient";
 
-export default async function NewDiaryPage() {
+export default async function DiaryPage() {
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
-  if (!user) redirect("/login");
+  if (!user) redirect("/");
 
-  return <NewDiaryClient />;
+  return <DiaryClient />;
 }

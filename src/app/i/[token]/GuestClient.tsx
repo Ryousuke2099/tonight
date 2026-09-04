@@ -180,7 +180,7 @@ export default function GuestClient({ token }: { token: string }) {
           <div className="pt-6 border-t border-white/10 w-full space-y-2">
             <p className="text-xs text-moon/40">次回からもっと簡単に使うなら</p>
             <Link
-              href="/login"
+              href="/"
               className="block w-full rounded-xl bg-white/5 text-moon/80 text-sm py-3"
             >
               Tonightに登録する

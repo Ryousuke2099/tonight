@@ -30,6 +30,11 @@ Realtime publication をすべて含みます。再実行しても安全です�
 `Authentication → Providers → Email` で **Email OTP (magic link)** が
 有効になっていることを確認してください（デフォルトで有効です）。
 
+続けて、同じ `SQL Editor` で [`supabase/call_migration.sql`](./supabase/call_migration.sql)
+も実行してください。マッチした2人だけがブラウザ内通話（WebRTC）の
+シグナリング用 Realtime チャンネル `call:<matchId>` を使えるようにする
+RLS ポリシーです（`schema.sql` の後に実行。再実行しても安全）。
+
 ### 3. 環境変数を設定する
 
 ```bash
@@ -45,6 +50,7 @@ cp .env.local.example .env.local
 | `SUPABASE_SERVICE_ROLE_KEY` | service_role キー。マッチング計算とゲスト（未登録）フローでのみ、サーバー側の Route Handler から使用します。クライアントには一切送られません |
 | `NEXT_PUBLIC_DEMO_USER_PASSWORD` | デモユーザー（Haru/Yuki/Mei/Ren/Sora/Takumi）共通パスワード。ブラウザから使うため公開前提です |
 | `NEXT_PUBLIC_SITE_URL` | 招待リンクの絶対URL生成に使用（ローカルなら `http://localhost:3000`、本番なら Vercel の URL） |
+| `TURN_URLS` / `TURN_USERNAME` / `TURN_CREDENTIAL` | 任意。ブラウザ内通話（WebRTC）の TURN 中継サーバー。未設定でも公開 STUN のみで動作します（同一ネットワーク・デモ用途なら十分）。対称NAT・厳しいモバイル回線の相手とも安定して繋ぐ場合に設定。`/api/turn` 経由でクライアントに渡すため認証情報はバンドルに含まれません |
 
 ### 4. 依存関係をインストールして起動
 
@@ -158,9 +164,22 @@ npx tsx scripts/test-match-logic.ts   # マッチング計算のロジックの�
 3. デプロイ後、Supabase の `Authentication → URL Configuration` に本番
    ドメインの `/auth/callback` をリダイレクト先として追加してください。
 
+## マッチ後の通話（WebRTC）
+
+マッチカードの「📞 通話する」から、ブラウザ内でそのまま**音声通話**が
+できます（映像なし）。相手のカードにリアルタイムで着信が表示され、応答
+すると P2P で繋がります。シグナリングは Supabase Realtime Broadcast の
+プライベートチャンネル `call:<matchId>`（RLS で当事者のみに制限）を使い、
+専用の常駐サーバーは立てていません。詳細は
+[`ARCHITECTURE.md` §9](./ARCHITECTURE.md#9-通話webrtc音声のみ) を参照。
+
+デモや同一ネットワークなら公開 STUN のみで繋がります。対称NAT・厳しい
+モバイル回線もカバーするには TURN（`TURN_URLS` ほか）を設定します。
+
+「LINEで連絡する」「コピーして送る」も引き続き利用できます。
+
 ## スコープ外（意図的に実装していないもの）
 
-要件定義の P2 に対応し、以下は意図的に含めていません: アプリ内音声/ビデオ
-通話（WebRTC）、チャット、投稿・タイムライン、知らない人とのマッチング、
-AI、課金、詳細プロフィール、位置情報共有、カレンダー連携、SNSフィード。
-マッチ後の導線は「LINEで連絡する」「コピーして送る」のみです。
+以下は意図的に含めていません: ビデオ通話、チャット、投稿・タイムライン、
+知らない人とのマッチング、AI、課金、詳細プロフィール、位置情報共有、
+カレンダー連携、SNSフィード。

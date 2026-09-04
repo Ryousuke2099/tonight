@@ -2,14 +2,24 @@
 
 import { useState } from "react";
 import Avatar from "@/components/Avatar";
+import CallPanel from "@/components/CallPanel";
 import { formatRange } from "@/lib/slots";
 import { lineShareUrl, copyText } from "@/lib/share";
+import { useCall } from "@/lib/webrtc/useCall";
 import type { MatchWithFriend } from "@/types/db";
 
 export default function MatchCard({ match }: { match: MatchWithFriend }) {
   const [copied, setCopied] = useState(false);
   const range = formatRange(match.overlap_start, match.overlap_end);
   const message = `今夜 ${range} なら話せそう！電話する？ 🌙`;
+
+  // どちらの参加者が「自分」かは match 行から一意に決まる(friend が相手なので、
+  // user_a / user_b のうち friend.id でない方が自分)。
+  const meId = match.user_a === match.friend.id ? match.user_b : match.user_a;
+  // デモログインしたユーザー(Takumi/Haru 等)も is_demo だが実体はいるので
+  // 通話可能。自動生成のサンプル相手を呼んだ場合は誰も出ないまま呼び出し
+  // タイムアウトになるだけ(害はない)。
+  const call = useCall({ matchId: match.id, meId, peerId: match.friend.id });
 
   return (
     <div className="rounded-2xl bg-card p-5 space-y-4 border border-accent/20">
@@ -36,6 +46,14 @@ export default function MatchCard({ match }: { match: MatchWithFriend }) {
         </p>
       )}
 
+      <button
+        onClick={call.start}
+        disabled={call.phase !== "idle"}
+        className="w-full rounded-xl bg-accent text-night text-sm font-medium py-3 disabled:opacity-40 disabled:cursor-not-allowed"
+      >
+        {call.phase === "idle" ? "📞 通話する" : "通話中…"}
+      </button>
+
       <div className="flex gap-2">
         <a
           href={lineShareUrl(message)}
@@ -56,6 +74,12 @@ export default function MatchCard({ match }: { match: MatchWithFriend }) {
           {copied ? "コピー済み" : "コピー"}
         </button>
       </div>
+
+      <CallPanel
+        call={call}
+        peerName={match.friend.name}
+        peerAvatarUrl={match.friend.avatar_url}
+      />
     </div>
   );
 }

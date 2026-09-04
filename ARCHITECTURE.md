@@ -91,3 +91,37 @@ this is what makes the 3-device demo scenario (§17) actually runnable.
 
 Supabase Realtime (Postgres changes) on `matches` and `guest_responses`,
 scoped by RLS to rows the logged-in user is a party to.
+
+## 9. 通話（WebRTC、音声のみ）
+
+マッチカードの「📞 通話する」で、マッチした2人がブラウザ内で 1:1 音声通話
+できる（映像なし — プロダクトが「電話していい？」であって「顔を見せて」
+ではないため）。
+
+- **シグナリング**: Supabase Realtime の **Broadcast**（Postgres changes
+  ではない — SDP/ICE は一時的なメッセージで DB に残す意味がない）。トピックは
+  `call:<matchId>`、`private: true`。専用の常駐 WebSocket サーバーは立てない
+  ので、サーバーレス（Vercel/Netlify）のデプロイ形態を崩さない。
+- **認可**: `supabase/call_migration.sql` が `realtime.messages` に RLS
+  ポリシーを追加し、`realtime.topic()` から取り出した `matchId` の `matches`
+  行の当事者（`user_a` / `user_b`）だけが `call:*` トピックに join / 送信できる。
+  §4 のプライバシー原則（双方が opt-in するまで何も見えない）を通話レイヤーにも
+  適用する。DB には通話の記録を一切残さない。
+- **ICE**: `/api/turn`（要認証）が `iceServers` を返す。既定は Google の公開
+  STUN のみ。`TURN_URLS` / `TURN_USERNAME` / `TURN_CREDENTIAL` を設定すると
+  TURN 中継を追加（対称NAT・厳しいモバイル回線対策）。TURN の認証情報は
+  サーバーからのみ渡し、クライアントバンドルには含めない。
+- **クライアント**: `src/lib/webrtc/useCall.ts`（フック）＋
+  `src/components/CallPanel.tsx`（発信中/着信中/通話中/終了の下部シート）。
+  `MatchCard` がマッチ表示中は常にチャンネルを購読しているので、相手の発信は
+  `phase: "incoming"` としてそのカードに即表示される。ネゴシエーションは
+  グレアを避けた有向フロー: 発信 `ring` →相手 `accept` →発信側が offer →
+  相手が answer → `ice` 交換 → connected。両者同時発信時は id の大きい側が
+  着信側に降りる。
+- **既知の制約（MVP）**: TURN 未設定だと対称NAT 環境で P2P が張れないことが
+  ある。長時間通話でのアクセストークン失効時の `realtime.setAuth()` 再実行、
+  期限付き TURN クレデンシャル（HMAC）は未対応。`getUserMedia` は
+  secure context（https もしくは localhost）が必要。通話ボタンは相手が
+  `is_demo` でも表示する（デモログインした本物のユーザーとは実際に繋がる；
+  自動生成のサンプル相手を呼んだ場合は誰も出ずに呼び出しタイムアウトする
+  だけ）。

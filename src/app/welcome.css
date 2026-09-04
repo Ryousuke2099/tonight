@@ -1,0 +1,214 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family:
+    'Zen Maru Gothic',
+    'Hiragino Maru Gothic ProN',
+    'Hiragino Sans',
+    sans-serif;
+  background: #0a1230;
+}
+
+/* ---------- Welcome (launch splash + intro) ---------- */
+
+.welcome-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.welcome-phone {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      120% 60% at 50% 100%,
+      #48619a 0%,
+      #223464 45%,
+      #0d1442 100%
+    );
+
+  color: #eef0fb;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---------- Splash (app launch) ---------- */
+
+.welcome-splash {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.welcome-splash-logo {
+  display: block;
+  width: min(95vw, 380px);
+  height: auto;
+  object-fit: contain;
+}
+
+/* ---------- Intro carousel ---------- */
+
+.welcome-intro {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 18px;
+  padding: 20px;
+  text-align: center;
+}
+
+.welcome-copy {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+/* ---------- Login (independent of the intro carousel) ---------- */
+
+.login-screen {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 24px;
+  padding: 20px;
+  text-align: center;
+}
+
+.login-logo {
+  display: block;
+  width: min(80vw, 300px);
+  height: auto;
+  object-fit: contain;
+}
+
+.login-tagline {
+  margin: 0;
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.welcome-panel {
+  width: min(100%, 340px);
+  padding: 34px 20px 30px;
+  border: 1px solid rgba(238, 240, 251, 0.2);
+  border-radius: 20px;
+  background: rgba(13, 20, 66, 0.28);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+
+.welcome-panel-copy {
+  color: #eef0fb;
+  font-size: 14px;
+  line-height: 1.8;
+}
+
+.welcome-panel-copy p {
+  margin: 0;
+}
+
+.welcome-panel-heading {
+  margin: 0 0 0.6em !important;
+  font-weight: 700;
+}
+
+.welcome-panel-emphasis {
+  margin-top: 1.8em !important;
+  color: #c3cff0;
+  font-size: 16px;
+  line-height: 1.6;
+  font-weight: 700;
+  text-shadow: 0 2px 8px rgba(195, 207, 240, 0.16);
+}
+
+.welcome-app-icon {
+  display: block;
+  width: min(95vw, 380px);
+  height: 130px;
+  margin: 8px 0;
+  object-fit: contain;
+}
+
+.welcome-next-btn {
+  display: block;
+  width: 216px;
+  text-align: center;
+  background: linear-gradient(135deg, #6f7bf2 0%, #4b57d6 100%);
+  color: #fff;
+  font-family: inherit;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 999px;
+  border: none;
+  cursor: pointer;
+}
+
+.welcome-next-btn:hover,
+.welcome-next-btn:focus-visible {
+  background: linear-gradient(135deg, #7c87f5 0%, #5965e0 100%);
+}
+
+.welcome-next-btn:focus-visible {
+  outline: 2px solid #f4c95d;
+  outline-offset: 3px;
+}
+
+.welcome-page-indicators {
+  display: flex;
+  gap: 14px;
+  margin-top: 2px;
+}
+
+.welcome-page-indicator {
+  width: 10px;
+  height: 10px;
+  padding: 0;
+  border: 1px solid rgba(238, 240, 251, 0.7);
+  border-radius: 50%;
+  background: transparent;
+  cursor: pointer;
+}
+
+.welcome-page-indicator.is-active {
+  background: #6f7bf2;
+  border-color: #6f7bf2;
+  box-shadow:
+    0 0 0 4px rgba(111, 123, 242, 0.2),
+    0 0 10px rgba(111, 123, 242, 0.8);
+}
+
+.welcome-page-indicator:focus-visible {
+  outline: 2px solid #6f7bf2;
+  outline-offset: 3px;
+}

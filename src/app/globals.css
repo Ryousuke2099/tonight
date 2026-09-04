@@ -1,12 +1,11 @@
 @import "tailwindcss";
 
 /*
- * Tonight is a night-first product — always dark, not theme-adaptive.
- * Palette aligned to the Woolink brand system (2026-09-02): メイン(blue)
- * navy base, アクセント1(gold) for the primary accent. `--color-ember`
- * stays outside the brand scales — it's a functional error/warning color,
- * kept separate the same way the concept sheet keeps its status badges
- * independent of the brand palette.
+ * Woolink — night-first, always dark. Screens carry their own hand-written
+ * CSS (co-located `*.css` per route, ported from the Woolink UI). The
+ * Tailwind tokens below stay for the components shared from the earlier
+ * "tonight" build (CallPanel, MatchCard, Avatar, …) that still use utility
+ * classes.
  */
 :root {
   --color-night: #080b17;
@@ -17,6 +16,12 @@
   --color-accent: #f0ce49;
   --color-accent-soft: #f0ce4933;
   --color-ember: #f0955c;
+
+  /* Woolink palette (from the ported route CSS) */
+  --wl-bg: #0a1230;
+  --wl-ink: #eef0fb;
+  --wl-accent: #6f7bf2;
+  --wl-accent-deep: #4b57d6;
 }
 
 @theme inline {
@@ -35,18 +40,123 @@ html {
 }
 
 body {
-  background: radial-gradient(circle at 50% -10%, #1d2f85 0%, var(--color-night-deep) 60%);
-  background-attachment: fixed;
-  color: var(--color-moon);
-  font-family: ui-sans-serif, system-ui, -apple-system, "Hiragino Sans", "Hiragino Kaku Gothic ProN",
-    "Yu Gothic", "Noto Sans JP", "Segoe UI", Roboto, sans-serif;
+  margin: 0;
+  min-height: 100%;
+  background: var(--wl-bg);
+  color: var(--wl-ink);
+  font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Hiragino Sans",
+    ui-sans-serif, system-ui, "Yu Gothic", "Noto Sans JP", "Segoe UI", Roboto, sans-serif;
   -webkit-tap-highlight-color: transparent;
 }
 
-/* selection handle for the availability picker should never trigger native
- * text selection while dragging on mobile */
+/* selection handle for the availability / time picker should never trigger
+ * native text selection while dragging on mobile */
 .no-select {
   -webkit-user-select: none;
   user-select: none;
   touch-action: none;
+}
+
+/* ───────────────────────── Woolink header + hamburger menu ───────────────────────── */
+.woolink-header {
+  position: relative;
+  z-index: 30;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 20px;
+  background: #0a1140;
+  color: #eef0fb;
+}
+
+.woolink-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.woolink-header-name {
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: 0.02em;
+  color: #f3f4fb;
+}
+
+.woolink-menu-btn {
+  width: 32px;
+  height: 26px;
+  background: none;
+  border: none;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  cursor: pointer;
+}
+
+.woolink-menu-btn span {
+  display: block;
+  width: 100%;
+  height: 2.5px;
+  background: #eef0fb;
+  border-radius: 2px;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.woolink-menu-btn.open span:nth-child(1) {
+  transform: translateY(11px) rotate(45deg);
+}
+.woolink-menu-btn.open span:nth-child(2) {
+  opacity: 0;
+}
+.woolink-menu-btn.open span:nth-child(3) {
+  transform: translateY(-11px) rotate(-45deg);
+}
+
+.woolink-menu-panel {
+  position: fixed;
+  top: 62px;
+  right: max(16px, calc((100vw - 420px) / 2 + 16px));
+  z-index: 100;
+  width: 200px;
+  background: #f7f6f2;
+  border-radius: 14px;
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+  padding: 6px;
+  display: flex;
+  flex-direction: column;
+}
+
+.woolink-menu-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 13px 14px;
+  border: none;
+  background: none;
+  color: #2b2b3a;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 14.5px;
+  border-radius: 10px;
+  cursor: pointer;
+}
+
+.woolink-menu-item:not(:last-child) {
+  border-bottom: 1px solid #e7e5dd;
+  border-radius: 10px 10px 0 0;
+}
+
+.woolink-menu-item:hover,
+.woolink-menu-item:active {
+  background: #ece9e1;
+}
+
+.woolink-menu-item svg {
+  color: #9c9a90;
+  flex-shrink: 0;
 }

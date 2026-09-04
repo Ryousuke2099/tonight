@@ -1,0 +1,270 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family:
+    'Zen Maru Gothic',
+    'Hiragino Maru Gothic ProN',
+    'Hiragino Sans',
+    sans-serif;
+  background: #0a1230;
+}
+
+/* ---------- Call flow: Time ---------- */
+
+.time-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.time-phone {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      120% 60% at 50% 100%,
+      #48619a 0%,
+      #223464 45%,
+      #0d1442 100%
+    );
+
+  color: #eef0fb;
+
+  display: flex;
+  flex-direction: column;
+
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.time-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.time-scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 16px 20px 0;
+}
+
+.time-footer-actions {
+  flex-shrink: 0;
+  padding: 12px 20px 20px;
+  box-shadow: 0 -12px 16px -8px rgba(5, 8, 24, 0.35);
+}
+
+/* ---------- Selected contact (context card) ---------- */
+
+.time-selected-contact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: #4a3f22;
+  box-shadow: inset 0 0 0 1px #f2c94c;
+  border-radius: 12px;
+  padding: 8px 12px;
+  margin-bottom: 14px;
+}
+
+.time-avatar {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #3c5a68;
+}
+
+.time-contact-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.time-contact-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #eef0fb;
+}
+
+.time-contact-tag {
+  font-size: 10px;
+  color: #f2c94c;
+  white-space: nowrap;
+}
+
+.time-radio-dot {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  position: relative;
+}
+
+.time-radio-dot.is-checked {
+  background: #f2c94c;
+  border-color: #f2c94c;
+}
+
+.time-radio-dot.is-checked::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 4px;
+  border-left: 2px solid #3a3620;
+  border-bottom: 2px solid #3a3620;
+  transform: translate(-50%, -60%) rotate(-45deg);
+}
+
+/* ---------- Time picker ---------- */
+
+.time-picker-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+
+.time-picker-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: #eef0fb;
+}
+
+.time-picker-status {
+  font-size: 12px;
+  font-weight: 700;
+  color: #f2c94c;
+}
+
+.time-grid {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 14px;
+  padding: 4px 10px;
+  margin-bottom: 20px;
+}
+
+.time-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: none;
+  border: none;
+  padding: 1px 0;
+  cursor: pointer;
+  font-family: inherit;
+  -webkit-user-select: none;
+  user-select: none;
+  touch-action: none;
+}
+
+.time-row:nth-child(odd) {
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 1px;
+  padding-top: 5px;
+}
+
+.time-row:first-child {
+  border-top: none;
+  margin-top: 0;
+  padding-top: 1px;
+}
+
+.time-label {
+  flex-shrink: 0;
+  width: 28px;
+  font-size: 9px;
+  color: #9296b8;
+  text-align: left;
+}
+
+.time-bar {
+  flex: 1;
+  height: 14px;
+  border-radius: 4px;
+  background: rgba(255, 255, 255, 0.06);
+  transition: background-color 0.1s ease;
+}
+
+.time-row.is-selected .time-bar {
+  background: #5762e0;
+}
+
+.time-row.is-selected .time-label {
+  color: #cfd3f0;
+}
+
+/* ---------- Footer buttons ---------- */
+
+.time-next-btn {
+  display: block;
+  text-align: center;
+  background: linear-gradient(135deg, #6f7bf2 0%, #4b57d6 100%);
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 999px;
+}
+
+.time-next-btn.is-disabled {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.time-back-btn-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0 0;
+}
+
+.time-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #eef0fb;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.time-back-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}

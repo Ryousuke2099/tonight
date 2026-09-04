@@ -38,6 +38,15 @@ export function nextNDatesJST(n: number, base: string = tonightDateJST()): strin
   });
 }
 
+/** Wall-clock Date for slot `slotIndex` on `dateStr` (YYYY-MM-DD). Slot 0 =
+ * 20:00, 30-minute steps, late slots roll past midnight. Uses the runtime's
+ * local timezone (the app is Asia/Tokyo-only). Used to schedule the
+ * "話せる時間になりました" nudge on a match. */
+export function slotDateTime(dateStr: string, slotIndex: number): Date {
+  const [y, m, d] = dateStr.split("-").map(Number);
+  return new Date(y, m - 1, d, 20, slotIndex * 30);
+}
+
 /** Short label for the date-picker chips: "今日" / "明日" / "8/26（水）". */
 export function formatDateShortJa(dateStr: string, base: string = tonightDateJST()): string {
   const [tonight, tomorrow] = nextNDatesJST(2, base);

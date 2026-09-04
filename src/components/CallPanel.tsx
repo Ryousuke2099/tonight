@@ -21,10 +21,13 @@ export default function CallPanel({
   call,
   peerName,
   peerAvatarUrl,
+  scheduledLabel,
 }: {
   call: UseCall;
   peerName: string;
   peerAvatarUrl: string | null;
+  /** マッチした時間帯（例: "9月5日（金） 22:00〜24:00"）。発信/着信/通話中に表示。 */
+  scheduledLabel?: string;
 }) {
   const audioRef = useRef<HTMLAudioElement>(null);
 
@@ -60,6 +63,10 @@ export default function CallPanel({
             <span className="ml-auto flex h-2.5 w-2.5 rounded-full bg-accent animate-pulse" />
           )}
         </div>
+
+        {scheduledLabel && !terminal && (
+          <p className="text-xs text-moon/50">🌙 {scheduledLabel} の約束</p>
+        )}
 
         {call.error && !terminal && (
           <p className="text-xs text-ember">{call.error}</p>

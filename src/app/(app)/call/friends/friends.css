@@ -1,0 +1,314 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family:
+    'Zen Maru Gothic',
+    'Hiragino Maru Gothic ProN',
+    'Hiragino Sans',
+    sans-serif;
+  background: #0a1230;
+}
+
+/* ---------- Call flow: Friends ---------- */
+
+.friends-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.friends-phone {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      120% 60% at 50% 100%,
+      #48619a 0%,
+      #223464 45%,
+      #0d1442 100%
+    );
+
+  color: #eef0fb;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.friends-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.friends-scroll-area {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 20px 20px 0;
+}
+
+.friends-footer-actions {
+  flex-shrink: 0;
+  padding: 12px 20px 20px;
+  box-shadow: 0 -12px 16px -8px rgba(5, 8, 24, 0.35);
+}
+
+.friends-page-title {
+  margin: 4px 0 14px;
+  font-size: 15px;
+  font-weight: 700;
+  color: #eef0fb;
+}
+
+.friends-notice {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255, 255, 255, 0.06);
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin: 0 0 14px;
+  font-size: 11px;
+  color: #b7bce0;
+  line-height: 1.5;
+}
+
+.friends-notice-icon {
+  flex-shrink: 0;
+  color: #b7bce0;
+}
+
+/* ---------- Contact list ---------- */
+
+.friends-contact-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.friends-contact-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(255, 255, 255, 0.06);
+  border: none;
+  border-radius: 12px;
+  padding: 10px 12px;
+  cursor: pointer;
+  font-family: inherit;
+  text-align: left;
+  width: 100%;
+}
+
+.friends-contact-row.is-selected {
+  background: #4a3f22;
+  box-shadow: inset 0 0 0 1px #f2c94c;
+}
+
+.friends-avatar {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #3b4470;
+  overflow: hidden;
+}
+
+.friends-avatar.avatar-1 {
+  background: #3b4470;
+}
+
+.friends-avatar.avatar-2 {
+  background: #4a4270;
+}
+
+.friends-avatar.avatar-3 {
+  background: #35507a;
+}
+
+.friends-avatar.avatar-4 {
+  background: #52406e;
+}
+
+.friends-avatar.avatar-5 {
+  background: #3c5a68;
+}
+
+.friends-avatar.avatar-6 {
+  background: #444a72;
+}
+
+.friends-contact-main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.friends-contact-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #eef0fb;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.friends-contact-tag {
+  font-size: 10px;
+  color: #f2c94c;
+  white-space: nowrap;
+}
+
+.friends-radio-dot {
+  flex-shrink: 0;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  position: relative;
+}
+
+.friends-contact-row.is-selected .friends-radio-dot {
+  background: #f2c94c;
+  border-color: #f2c94c;
+}
+
+.friends-contact-row.is-selected .friends-radio-dot::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 7px;
+  height: 4px;
+  border-left: 2px solid #3a3620;
+  border-bottom: 2px solid #3a3620;
+  transform: translate(-50%, -60%) rotate(-45deg);
+}
+
+/* ---------- Invite box ---------- */
+
+.friends-invite-box {
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 4px;
+}
+
+.friends-invite-label {
+  display: block;
+  font-size: 11px;
+  color: #b7bce0;
+  margin-bottom: 8px;
+}
+
+.friends-invite-row {
+  display: flex;
+  gap: 8px;
+}
+
+.friends-invite-input {
+  flex: 1;
+  min-width: 0;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 8px;
+  padding: 10px 12px;
+  color: #eef0fb;
+  font-size: 12px;
+  font-family: inherit;
+}
+
+.friends-invite-input::placeholder {
+  color: #6d7290;
+}
+
+.friends-invite-btn {
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 16px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  color: #eef0fb;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.friends-invite-link {
+  display: block;
+  text-align: center;
+  margin: 14px 0 0;
+  font-size: 12px;
+  font-weight: 700;
+  color: #f2c94c;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+/* ---------- Footer buttons ---------- */
+
+.friends-next-btn {
+  display: block;
+  text-align: center;
+  background: linear-gradient(135deg, #6f7bf2 0%, #4b57d6 100%);
+  color: #fff;
+  text-decoration: none;
+  font-size: 15px;
+  font-weight: 700;
+  padding: 16px;
+  border-radius: 999px;
+}
+
+.friends-next-btn.is-disabled {
+  background: rgba(255, 255, 255, 0.12);
+  color: rgba(255, 255, 255, 0.4);
+  pointer-events: none;
+}
+
+.friends-back-btn-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 20px 0 0;
+}
+
+.friends-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #eef0fb;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.friends-back-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}

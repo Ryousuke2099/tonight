@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&display=swap');
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+  font-family:
+    'Zen Maru Gothic',
+    'Hiragino Maru Gothic ProN',
+    'Hiragino Sans',
+    sans-serif;
+  background: #0a1230;
+}
+
+/* ---------- Call flow: Who ---------- */
+
+.who-page {
+  width: 100%;
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.who-phone {
+  position: relative;
+  width: 100%;
+  max-width: 420px;
+  min-height: 100vh;
+  overflow: hidden;
+
+  background:
+    radial-gradient(
+      120% 60% at 50% 100%,
+      #48619a 0%,
+      #223464 45%,
+      #0d1442 100%
+    );
+
+  color: #eef0fb;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.who-content {
+  padding: 22px 20px 0;
+  flex: 1;
+}
+
+.who-page-title {
+  margin: 12px 0 20px;
+  text-align: center;
+  font-size: 15px;
+  font-weight: 700;
+  color: #eef0fb;
+}
+
+.who-actions {
+  display: flex;
+  gap: 16px;
+}
+
+.who-tile {
+  position: relative;
+  flex: 1;
+  aspect-ratio: 1 / 1;
+
+  border-radius: 20px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+
+  text-decoration: none;
+
+  background: rgba(46, 57, 105, 0.82);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+
+  box-shadow: 0 10px 22px rgba(0, 0, 0, 0.25);
+
+  cursor: pointer;
+
+  transition:
+    transform 0.2s ease,
+    box-shadow 0.2s ease,
+    background 0.2s ease;
+}
+
+.who-tile:hover,
+.who-tile:focus {
+  transform: translateY(-4px);
+  background:
+    linear-gradient(
+      155deg,
+      #6f7bf2 0%,
+      #5762e0 60%,
+      #4b57d6 100%
+    );
+  box-shadow: 0 14px 28px rgba(0, 0, 0, 0.35);
+}
+
+.who-tile:focus-visible {
+  outline: 2px solid #f4c95d;
+  outline-offset: 3px;
+}
+
+.who-tile-illustration {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 44px;
+
+  transition:
+    transform 0.2s ease,
+    filter 0.2s ease;
+}
+
+.who-tile:hover .who-tile-illustration,
+.who-tile:focus .who-tile-illustration {
+  transform: scale(1.14);
+  filter: drop-shadow(0 0 7px rgba(244, 201, 93, 0.85));
+}
+
+.who-tile-label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #fbfaf6;
+  transition: color 0.2s ease;
+}
+
+.who-tile:hover .who-tile-label,
+.who-tile:focus .who-tile-label {
+  color: #f4c95d;
+}
+
+/* ---------- Back button ---------- */
+
+.who-back-btn-wrap {
+  display: flex;
+  justify-content: center;
+  padding: 28px 0 20px;
+}
+
+.who-back-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid rgba(255, 255, 255, 0.55);
+  color: #eef0fb;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  padding: 12px 22px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.who-back-btn:active {
+  background: rgba(255, 255, 255, 0.1);
+}
